@@ -1,5 +1,6 @@
 package com.tlsmonitor.ui;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tlsmonitor.alerts.entity.Alert;
 import com.tlsmonitor.alerts.repository.AlertRepository;
 import com.tlsmonitor.alerts.scheduler.MonitoringScheduler;
@@ -30,9 +31,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.mail.MailSendException;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -409,11 +407,8 @@ public class FinalDeliveryScenariosTest {
     @Test
     @DisplayName("TC-29: Email notification delivery failure handled gracefully without exception")
     void testTC29_emailNotificationDeliveryFailureHandling() {
-        JavaMailSender mockSender = mock(JavaMailSender.class);
-        doThrow(new MailSendException("SMTP connection timed out"))
-                .when(mockSender).send(any(SimpleMailMessage.class));
-
-        EmailService testEmailService = new EmailService(mockSender);
+        // Relay is unreachable/misconfigured: EmailService must handle failure gracefully and return false
+        EmailService testEmailService = new EmailService("http://127.0.0.1:1/unreachable", "test-secret", new ObjectMapper());
 
         Alert alert = new Alert();
         alert.setDomain("smtp-fail.example.com");
